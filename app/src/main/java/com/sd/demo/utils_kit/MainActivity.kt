@@ -4,8 +4,10 @@ import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import com.sd.lib.coroutine.FScope
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
+    private val _scope = FScope()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -14,8 +16,15 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onClick(v: View) {
         when (v.id) {
-            R.id.btn -> {}
+            R.id.btn -> {
+
+            }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        _scope.cancel()
     }
 }
 
