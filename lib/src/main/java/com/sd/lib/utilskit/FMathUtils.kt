@@ -64,7 +64,7 @@ fun Number.fScale(scale: Int, mode: RoundingMode = RoundingMode.HALF_UP): BigDec
  * @param scale      最多保留几位小数
  * @param mode       舍入模式
  */
-fun fTransformBoundsValue(
+fun fScaleBoundsValue(
     inputMin: Double, inputMax: Double,
     outputMin: Double, outputMax: Double,
     inputValue: Double,
@@ -73,13 +73,24 @@ fun fTransformBoundsValue(
     require(inputMin < inputMax) { "require inputMin < inputMax" }
     require(outputMin < outputMax) { "require outputMin < outputMax" }
     val input = inputValue.coerceIn(inputMin, inputMax)
-
-    val inputTotal = inputMax.fSubtract(inputMin).toDouble()
-    val inputDelta = input.fSubtract(inputMin).toDouble()
-    val inputPercent = inputDelta.fDivide(inputTotal).toDouble()
-
-    val outTotal = outputMax.fSubtract(outputMin).toDouble()
-    val outDelta = outTotal.fMultiply(inputPercent).toDouble()
-    val result = outputMin.fAdd(outDelta).toDouble()
+    val result = scaleBoundsValue(
+        inputMin = inputMin, inputMax = inputMax,
+        outputMin = outputMin, outputMax = outputMax,
+        input = input,
+    )
     return result.fScale(scale, mode).toDouble()
+}
+
+private fun scaleBoundsValue(
+    inputMin: Number, inputMax: Number,
+    outputMin: Number, outputMax: Number,
+    input: Number,
+): Number {
+    val inputTotal = inputMax.fSubtract(inputMin)
+    val inputDelta = input.fSubtract(inputMin)
+    val inputPercent = inputDelta.fDivide(inputTotal)
+
+    val outTotal = outputMax.fSubtract(outputMin)
+    val outDelta = outTotal.fMultiply(inputPercent)
+    return outputMin.fAdd(outDelta)
 }
