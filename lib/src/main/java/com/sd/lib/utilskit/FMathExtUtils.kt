@@ -1,7 +1,5 @@
 package com.sd.lib.utilskit
 
-import java.math.RoundingMode
-
 /**
  * input:[0-100]
  * output:[0-10]
@@ -20,7 +18,6 @@ fun fScaleBoundsValue(
     inputMin: Double, inputMax: Double,
     outputMin: Double, outputMax: Double,
     inputValue: Double,
-    scale: Int, mode: RoundingMode = RoundingMode.HALF_UP,
 ): Double {
     require(inputMin < inputMax) { "require inputMin < inputMax" }
     require(outputMin < outputMax) { "require outputMin < outputMax" }
@@ -30,7 +27,7 @@ fun fScaleBoundsValue(
         outputMin = outputMin, outputMax = outputMax,
         input = input,
     )
-    return result.fScale(scale, mode).toDouble()
+    return result.toDouble()
 }
 
 private fun scaleBoundsValue(
