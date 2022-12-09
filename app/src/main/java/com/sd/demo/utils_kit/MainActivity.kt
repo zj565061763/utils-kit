@@ -5,6 +5,7 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.sd.lib.coroutine.FScope
+import com.sd.lib.utilskit.fToast
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
     private val _scope = FScope()
@@ -17,7 +18,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View) {
         when (v.id) {
             R.id.btn -> {
-
+                fToast("hello")
             }
         }
     }
