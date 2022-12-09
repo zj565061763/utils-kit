@@ -8,6 +8,19 @@ import com.sd.lib.ctx.fContext
 
 private val packageManager = fContext.packageManager
 
+fun fVersionCode(): Long {
+    val packageInfo = fMyPackageInfo()
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+        packageInfo.longVersionCode
+    } else {
+        packageInfo.versionCode.toLong()
+    }
+}
+
+fun fVersionName(): String {
+    return fMyPackageInfo().versionName
+}
+
 /**
  * 当前App的包信息
  */
