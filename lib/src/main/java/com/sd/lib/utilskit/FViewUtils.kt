@@ -10,6 +10,7 @@ fun View?.fSetWidth(value: Int) {
     val params = this.layoutParams ?: return
     if (params.width != value) {
         params.width = value
+        this.layoutParams = params
     }
 }
 
@@ -21,6 +22,7 @@ fun View?.fSetHeight(value: Int) {
     val params = this.layoutParams ?: return
     if (params.height != value) {
         params.height = value
+        this.layoutParams = params
     }
 }
 
@@ -33,5 +35,6 @@ fun View?.fSetSize(width: Int, height: Int) {
     if (params.width != width || params.height != height) {
         params.width = width
         params.height = height
+        this.layoutParams = params
     }
 }
