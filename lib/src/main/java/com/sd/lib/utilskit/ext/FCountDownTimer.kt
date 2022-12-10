@@ -8,13 +8,14 @@ import android.os.CountDownTimer
 abstract class FCountDownTimer {
     private var _timer: CountDownTimer? = null
     private var _interval = 1000L
+    private var _leftTime: Long? = null
 
     /**
      * 倒计时是否已经启动
      */
     @get:Synchronized
     val isStarted: Boolean
-        get() = _timer != null
+        get() = _timer != null || _leftTime != null
 
     /**
      * 设置倒计时间隔，默认1000毫秒
@@ -34,8 +35,9 @@ abstract class FCountDownTimer {
     fun start(millis: Long) {
         stop()
         object : CountDownTimer(millis, _interval) {
-            override fun onTick(millisUntilFinished: Long) {
-                this@FCountDownTimer.onTick(millisUntilFinished)
+            override fun onTick(leftTime: Long) {
+                _leftTime = leftTime
+                this@FCountDownTimer.onTick(leftTime)
             }
 
             override fun onFinish() {
@@ -53,9 +55,36 @@ abstract class FCountDownTimer {
      */
     @Synchronized
     fun stop() {
+        stopInternal()
+    }
+
+    /**
+     * 暂停计时
+     */
+    @Synchronized
+    fun pause() {
+        if (isStarted) {
+            stopInternal(resetLeftTime = false)
+        }
+    }
+
+    /**
+     * 恢复计时
+     */
+    @Synchronized
+    fun resume() {
+        _leftTime?.let {
+            start(it)
+        }
+    }
+
+    private fun stopInternal(resetLeftTime: Boolean = true) {
         _timer?.let {
             it.cancel()
             _timer = null
+        }
+        if (resetLeftTime) {
+            _leftTime = null
         }
     }
 
