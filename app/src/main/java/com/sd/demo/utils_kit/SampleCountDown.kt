@@ -1,6 +1,7 @@
 package com.sd.demo.utils_kit
 
 import android.os.Bundle
+import android.os.Looper
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.sd.lib.coroutine.FScope
@@ -27,11 +28,13 @@ class SampleCountDown : AppCompatActivity(), View.OnClickListener {
 
     private val _timer = object : FCountDownTimer() {
         override fun onTick(leftTime: Long) {
-            logMsg { "onTick ${leftTime / 1000} $leftTime" }
+            val isMain = Looper.getMainLooper() == Looper.myLooper()
+            logMsg { "onTick ${leftTime / 1000} $leftTime $isMain" }
         }
 
         override fun onFinish() {
-            logMsg { "onFinish" }
+            val isMain = Looper.getMainLooper() == Looper.myLooper()
+            logMsg { "onFinish $isMain" }
         }
     }
 
