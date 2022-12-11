@@ -1,27 +1,34 @@
 package com.sd.lib.utilskit.ext
 
 import android.os.CountDownTimer
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
 
 /**
  * 倒计时类
  */
 abstract class FCountDownTimer {
+    private var _isStarted = false
     private var _timer: CountDownTimer? = null
+
+    @Volatile
     private var _interval = 1000L
+
     private var _leftTime: Long? = null
+    private var _stopTimeInFuture: Long? = null
 
     /**
      * 倒计时是否已经启动
      */
     @Synchronized
-    fun isStarted(): Boolean = _timer != null || _leftTime != null
+    fun isStarted(): Boolean = _isStarted
 
     /**
      * 设置倒计时间隔，默认1000毫秒
      */
-    @Synchronized
     fun setInterval(interval: Long) {
-        require(interval >= 0)
+        require(interval > 0)
         _interval = interval
     }
 
@@ -33,30 +40,10 @@ abstract class FCountDownTimer {
     @Synchronized
     fun start(millis: Long) {
         cancel()
-        object : CountDownTimer(millis, _interval) {
-            override fun onTick(leftTime: Long) {
-                synchronized(this@FCountDownTimer) {
-                    _leftTime = leftTime
-                }
-                this@FCountDownTimer.onTick(leftTime)
-            }
-
-            override fun onFinish() {
-                cancel()
-                this@FCountDownTimer.onFinish()
-            }
-        }.also {
-            _timer = it
-            it.start()
-        }
-    }
-
-    /**
-     * 取消倒计时
-     */
-    @Synchronized
-    fun cancel() {
-        cancelInternal()
+        val time = millis.coerceAtLeast(0)
+        _stopTimeInFuture = SystemClock.elapsedRealtime() + time
+        _isStarted = true
+        startTimer(time)
     }
 
     /**
@@ -64,8 +51,14 @@ abstract class FCountDownTimer {
      */
     @Synchronized
     fun pause() {
-        if (isStarted()) {
-            cancelInternal(resetLeftTime = false)
+        if (_isStarted) {
+            if (_leftTime == null) {
+                val leftTime = _stopTimeInFuture!! - SystemClock.elapsedRealtime()
+                if (leftTime > 0) {
+                    _leftTime = leftTime
+                    cancelTimer()
+                }
+            }
         }
     }
 
@@ -74,18 +67,64 @@ abstract class FCountDownTimer {
      */
     @Synchronized
     fun resume() {
-        _leftTime?.let {
-            start(it)
+        if (_isStarted) {
+            _leftTime?.let {
+                _leftTime = null
+                startTimer(it)
+            }
         }
     }
 
-    private fun cancelInternal(resetLeftTime: Boolean = true) {
+    /**
+     * 取消倒计时
+     */
+    @Synchronized
+    fun cancel() {
+        cancelTimer()
+        _leftTime = null
+        _stopTimeInFuture = null
+        _isStarted = false
+    }
+
+    private fun startTimer(time: Long) {
+        createTimer(time) {
+            synchronized(this@FCountDownTimer) {
+                if (_isStarted) {
+                    _timer = it
+                    it.start()
+                }
+            }
+        }
+    }
+
+    private fun createTimer(time: Long, block: (CountDownTimer) -> Unit) {
+        if (Looper.myLooper() == Looper.getMainLooper()) {
+            createTimerUiThread(time, block)
+        } else {
+            Handler(Looper.getMainLooper()).post { createTimerUiThread(time, block) }
+        }
+    }
+
+    private fun createTimerUiThread(time: Long, block: (CountDownTimer) -> Unit) {
+        check(Looper.myLooper() == Looper.getMainLooper())
+        object : CountDownTimer(time, _interval) {
+            override fun onTick(leftTime: Long) {
+                this@FCountDownTimer.onTick(leftTime)
+            }
+
+            override fun onFinish() {
+                this@FCountDownTimer.cancel()
+                this@FCountDownTimer.onFinish()
+            }
+        }.also {
+            block(it)
+        }
+    }
+
+    private fun cancelTimer() {
         _timer?.let {
             it.cancel()
             _timer = null
-        }
-        if (resetLeftTime) {
-            _leftTime = null
         }
     }
 
