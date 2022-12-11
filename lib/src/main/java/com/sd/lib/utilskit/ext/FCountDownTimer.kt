@@ -16,7 +16,7 @@ abstract class FCountDownTimer {
     private var _interval = 1000L
 
     private var _leftTime: Long? = null
-    private var _stopTimeInFuture: Long? = null
+    private var _stopTime: Long? = null
 
     /**
      * 倒计时是否已经启动
@@ -41,7 +41,7 @@ abstract class FCountDownTimer {
     fun start(millis: Long) {
         cancel()
         val time = millis.coerceAtLeast(0)
-        _stopTimeInFuture = SystemClock.elapsedRealtime() + time
+        _stopTime = SystemClock.elapsedRealtime() + time
         _isStarted = true
         startTimer(time)
     }
@@ -53,7 +53,7 @@ abstract class FCountDownTimer {
     fun pause() {
         if (_isStarted) {
             if (_leftTime == null) {
-                val leftTime = _stopTimeInFuture!! - SystemClock.elapsedRealtime()
+                val leftTime = _stopTime!! - SystemClock.elapsedRealtime()
                 if (leftTime > 0) {
                     _leftTime = leftTime
                     cancelTimer()
@@ -82,7 +82,7 @@ abstract class FCountDownTimer {
     fun cancel() {
         cancelTimer()
         _leftTime = null
-        _stopTimeInFuture = null
+        _stopTime = null
         _isStarted = false
     }
 
