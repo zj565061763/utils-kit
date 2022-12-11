@@ -17,7 +17,7 @@ abstract class FCountDownTimer {
 
     private var _duration = 0L
     private var _startTime: Long? = null
-    private var _leftDuration: Long? = null
+    private var _pauseDuration: Long? = null
 
     /**
      * 倒计时是否已经启动
@@ -29,7 +29,7 @@ abstract class FCountDownTimer {
      * 倒计时是否被暂停
      */
     @Synchronized
-    fun isPaused(): Boolean = _leftDuration != null
+    fun isPaused(): Boolean = _pauseDuration != null
 
     /**
      * 设置倒计时间隔，默认1000毫秒
@@ -59,10 +59,10 @@ abstract class FCountDownTimer {
      */
     @Synchronized
     fun pause() {
-        if (_isStarted && _leftDuration == null) {
-            val leftDuration = _duration - (SystemClock.elapsedRealtime() - _startTime!!)
-            if (leftDuration > 0) {
-                _leftDuration = leftDuration
+        if (_isStarted && _pauseDuration == null) {
+            val left = _duration - (SystemClock.elapsedRealtime() - _startTime!!)
+            if (left > 0) {
+                _pauseDuration = left
                 cancelTimer()
             }
         }
@@ -74,9 +74,9 @@ abstract class FCountDownTimer {
     @Synchronized
     fun resume() {
         if (_isStarted) {
-            _leftDuration?.let {
+            _pauseDuration?.let {
                 check(it > 0)
-                _leftDuration = null
+                _pauseDuration = null
                 startTimer(it)
             }
         }
@@ -89,7 +89,7 @@ abstract class FCountDownTimer {
     fun cancel() {
         cancelTimer()
         _startTime = null
-        _leftDuration = null
+        _pauseDuration = null
         _isStarted = false
     }
 
