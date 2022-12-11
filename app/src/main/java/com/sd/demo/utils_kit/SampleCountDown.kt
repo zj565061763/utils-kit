@@ -27,7 +27,7 @@ class SampleCountDown : AppCompatActivity(), View.OnClickListener {
 
     private val _timer = object : FCountDownTimer() {
         override fun onTick(leftTime: Long) {
-            logMsg { "onTick $leftTime" }
+            logMsg { "onTick ${leftTime / 1000} $leftTime" }
         }
 
         override fun onFinish() {
