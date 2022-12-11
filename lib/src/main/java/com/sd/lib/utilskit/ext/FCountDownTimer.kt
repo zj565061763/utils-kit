@@ -25,6 +25,12 @@ abstract class FCountDownTimer {
     fun isStarted(): Boolean = _isStarted
 
     /**
+     * 倒计时是否被暂停
+     */
+    @Synchronized
+    fun isPaused(): Boolean = _leftTime != null
+
+    /**
      * 设置倒计时间隔，默认1000毫秒
      */
     fun setInterval(interval: Long) {
@@ -90,7 +96,9 @@ abstract class FCountDownTimer {
             synchronized(this@FCountDownTimer) {
                 if (_isStarted) {
                     _timer = it
-                    it.start()
+                    if (!isPaused()) {
+                        it.start()
+                    }
                 }
             }
         }
