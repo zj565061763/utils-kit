@@ -83,6 +83,7 @@ abstract class FCountDownTimer {
             _pauseDuration?.let {
                 check(it > 0)
                 _pauseDuration = null
+                _startTime = SystemClock.elapsedRealtime()
                 startTimer(it)
             }
         }
@@ -104,7 +105,6 @@ abstract class FCountDownTimer {
             synchronized(this@FCountDownTimer) {
                 if (_isStarted && !isPaused()) {
                     _timer = it
-                    _startTime = SystemClock.elapsedRealtime()
                     it.start()
                 }
             }
