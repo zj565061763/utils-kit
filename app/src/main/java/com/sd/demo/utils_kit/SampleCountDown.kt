@@ -8,8 +8,6 @@ import com.sd.lib.coroutine.FScope
 import com.sd.lib.utilskit.ext.FCountDownTimer
 
 class SampleCountDown : AppCompatActivity(), View.OnClickListener {
-    private val _scope = FScope()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_sample_count_down)
@@ -40,6 +38,6 @@ class SampleCountDown : AppCompatActivity(), View.OnClickListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        _scope.cancel()
+        _timer.cancel()
     }
 }

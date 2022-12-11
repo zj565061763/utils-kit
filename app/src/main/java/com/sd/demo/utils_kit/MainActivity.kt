@@ -15,6 +15,7 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View) {
         when (v.id) {
             R.id.btn_sample_count_down -> startActivity(Intent(this, SampleCountDown::class.java))
+            R.id.btn_sample_delay_task -> startActivity(Intent(this, SampleDelayTask::class.java))
         }
     }
 }
