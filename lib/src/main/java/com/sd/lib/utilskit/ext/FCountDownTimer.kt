@@ -94,11 +94,9 @@ abstract class FCountDownTimer {
     private fun startTimer(time: Long) {
         createTimer(time) {
             synchronized(this@FCountDownTimer) {
-                if (_isStarted) {
+                if (_isStarted && !isPaused()) {
                     _timer = it
-                    if (!isPaused()) {
-                        it.start()
-                    }
+                    it.start()
                 }
             }
         }
