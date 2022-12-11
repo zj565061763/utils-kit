@@ -15,8 +15,13 @@ abstract class FCountDownTimer {
     @Volatile
     private var _interval = 1000L
 
-    private var _duration = 0L
+    /** 剩余时长 */
+    private var _leftDuration = 0L
+
+    /** 开始的时间 */
     private var _startTime: Long? = null
+
+    /** 暂停时的剩余时长 */
     private var _pauseDuration: Long? = null
 
     /**
@@ -48,7 +53,7 @@ abstract class FCountDownTimer {
     fun start(millis: Long) {
         cancel()
         val duration = millis.coerceAtLeast(0)
-        _duration = duration
+        _leftDuration = duration
         _startTime = SystemClock.elapsedRealtime()
         _isStarted = true
         startTimer(duration)
@@ -60,8 +65,9 @@ abstract class FCountDownTimer {
     @Synchronized
     fun pause() {
         if (_isStarted && _pauseDuration == null) {
-            val left = _duration - (SystemClock.elapsedRealtime() - _startTime!!)
+            val left = _leftDuration - (SystemClock.elapsedRealtime() - _startTime!!)
             if (left > 0) {
+                _leftDuration = left
                 _pauseDuration = left
                 cancelTimer()
             }
