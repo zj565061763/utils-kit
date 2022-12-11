@@ -15,8 +15,9 @@ abstract class FCountDownTimer {
     @Volatile
     private var _interval = 1000L
 
-    private var _leftTime: Long? = null
-    private var _stopTime: Long? = null
+    private var _duration = 0L
+    private var _startTime: Long? = null
+    private var _leftDuration: Long? = null
 
     /**
      * 倒计时是否已经启动
@@ -28,7 +29,7 @@ abstract class FCountDownTimer {
      * 倒计时是否被暂停
      */
     @Synchronized
-    fun isPaused(): Boolean = _leftTime != null
+    fun isPaused(): Boolean = _leftDuration != null
 
     /**
      * 设置倒计时间隔，默认1000毫秒
@@ -46,10 +47,11 @@ abstract class FCountDownTimer {
     @Synchronized
     fun start(millis: Long) {
         cancel()
-        val time = millis.coerceAtLeast(0)
-        _stopTime = SystemClock.elapsedRealtime() + time
+        val duration = millis.coerceAtLeast(0)
+        _duration = duration
+        _startTime = SystemClock.elapsedRealtime()
         _isStarted = true
-        startTimer(time)
+        startTimer(duration)
     }
 
     /**
@@ -57,10 +59,10 @@ abstract class FCountDownTimer {
      */
     @Synchronized
     fun pause() {
-        if (_isStarted && _leftTime == null) {
-            val leftTime = _stopTime!! - SystemClock.elapsedRealtime()
-            if (leftTime > 0) {
-                _leftTime = leftTime
+        if (_isStarted && _leftDuration == null) {
+            val leftDuration = _duration - (SystemClock.elapsedRealtime() - _startTime!!)
+            if (leftDuration > 0) {
+                _leftDuration = leftDuration
                 cancelTimer()
             }
         }
@@ -72,9 +74,9 @@ abstract class FCountDownTimer {
     @Synchronized
     fun resume() {
         if (_isStarted) {
-            _leftTime?.let {
+            _leftDuration?.let {
                 check(it > 0)
-                _leftTime = null
+                _leftDuration = null
                 startTimer(it)
             }
         }
@@ -86,13 +88,13 @@ abstract class FCountDownTimer {
     @Synchronized
     fun cancel() {
         cancelTimer()
-        _leftTime = null
-        _stopTime = null
+        _startTime = null
+        _leftDuration = null
         _isStarted = false
     }
 
-    private fun startTimer(time: Long) {
-        createTimer(time) {
+    private fun startTimer(duration: Long) {
+        createTimer(duration) {
             synchronized(this@FCountDownTimer) {
                 if (_isStarted && !isPaused()) {
                     _timer = it
@@ -102,17 +104,17 @@ abstract class FCountDownTimer {
         }
     }
 
-    private fun createTimer(time: Long, block: (CountDownTimer) -> Unit) {
+    private fun createTimer(duration: Long, block: (CountDownTimer) -> Unit) {
         if (Looper.myLooper() == Looper.getMainLooper()) {
-            createTimerUiThread(time, block)
+            createTimerUiThread(duration, block)
         } else {
-            Handler(Looper.getMainLooper()).post { createTimerUiThread(time, block) }
+            Handler(Looper.getMainLooper()).post { createTimerUiThread(duration, block) }
         }
     }
 
-    private fun createTimerUiThread(time: Long, block: (CountDownTimer) -> Unit) {
+    private fun createTimerUiThread(duration: Long, block: (CountDownTimer) -> Unit) {
         check(Looper.myLooper() == Looper.getMainLooper())
-        object : CountDownTimer(time, _interval) {
+        object : CountDownTimer(duration, _interval) {
             override fun onTick(leftTime: Long) {
                 this@FCountDownTimer.onTick(leftTime)
             }
