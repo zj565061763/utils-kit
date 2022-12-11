@@ -13,9 +13,8 @@ abstract class FCountDownTimer {
     /**
      * 倒计时是否已经启动
      */
-    @get:Synchronized
-    val isStarted: Boolean
-        get() = _timer != null || _leftTime != null
+    @Synchronized
+    fun isStarted(): Boolean = _timer != null || _leftTime != null
 
     /**
      * 设置倒计时间隔，默认1000毫秒
@@ -33,15 +32,17 @@ abstract class FCountDownTimer {
      */
     @Synchronized
     fun start(millis: Long) {
-        stop()
+        cancel()
         object : CountDownTimer(millis, _interval) {
             override fun onTick(leftTime: Long) {
-                _leftTime = leftTime
+                synchronized(this@FCountDownTimer) {
+                    _leftTime = leftTime
+                }
                 this@FCountDownTimer.onTick(leftTime)
             }
 
             override fun onFinish() {
-                stop()
+                cancel()
                 this@FCountDownTimer.onFinish()
             }
         }.also {
@@ -51,25 +52,25 @@ abstract class FCountDownTimer {
     }
 
     /**
-     * 停止倒计时
+     * 取消倒计时
      */
     @Synchronized
-    fun stop() {
-        stopInternal()
+    fun cancel() {
+        cancelInternal()
     }
 
     /**
-     * 暂停计时
+     * 暂停
      */
     @Synchronized
     fun pause() {
-        if (isStarted) {
-            stopInternal(resetLeftTime = false)
+        if (isStarted()) {
+            cancelInternal(resetLeftTime = false)
         }
     }
 
     /**
-     * 恢复计时
+     * 恢复
      */
     @Synchronized
     fun resume() {
@@ -78,7 +79,7 @@ abstract class FCountDownTimer {
         }
     }
 
-    private fun stopInternal(resetLeftTime: Boolean = true) {
+    private fun cancelInternal(resetLeftTime: Boolean = true) {
         _timer?.let {
             it.cancel()
             _timer = null
