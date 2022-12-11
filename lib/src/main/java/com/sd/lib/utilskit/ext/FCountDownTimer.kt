@@ -98,6 +98,7 @@ abstract class FCountDownTimer {
             synchronized(this@FCountDownTimer) {
                 if (_isStarted && !isPaused()) {
                     _timer = it
+                    _startTime = SystemClock.elapsedRealtime()
                     it.start()
                 }
             }
