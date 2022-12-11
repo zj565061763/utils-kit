@@ -1,15 +1,12 @@
 package com.sd.demo.utils_kit
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.sd.lib.coroutine.FScope
-import com.sd.lib.utilskit.fToast
 
 class MainActivity : AppCompatActivity(), View.OnClickListener {
-    private val _scope = FScope()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -17,15 +14,8 @@ class MainActivity : AppCompatActivity(), View.OnClickListener {
 
     override fun onClick(v: View) {
         when (v.id) {
-            R.id.btn -> {
-                fToast("hello")
-            }
+            R.id.btn_sample_count_down -> startActivity(Intent(this, SampleCountDown::class.java))
         }
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        _scope.cancel()
     }
 }
 
