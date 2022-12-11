@@ -19,7 +19,7 @@ class FVersionCode internal constructor(
     val isUpgraded: Boolean get() = currentVersion > oldVersion
 
     /**
-     * 升级到当前版本，只有[isUpgraded]为true才会升级
+     * 升级[type]的版本到当前版本[currentVersion]
      */
     fun upgrade() {
         if (isUpgraded) {
