@@ -51,13 +51,11 @@ abstract class FCountDownTimer {
      */
     @Synchronized
     fun pause() {
-        if (_isStarted) {
-            if (_leftTime == null) {
-                val leftTime = _stopTime!! - SystemClock.elapsedRealtime()
-                if (leftTime > 0) {
-                    _leftTime = leftTime
-                    cancelTimer()
-                }
+        if (_isStarted && _leftTime == null) {
+            val leftTime = _stopTime!! - SystemClock.elapsedRealtime()
+            if (leftTime > 0) {
+                _leftTime = leftTime
+                cancelTimer()
             }
         }
     }
@@ -69,6 +67,7 @@ abstract class FCountDownTimer {
     fun resume() {
         if (_isStarted) {
             _leftTime?.let {
+                check(it > 0)
                 _leftTime = null
                 startTimer(it)
             }
