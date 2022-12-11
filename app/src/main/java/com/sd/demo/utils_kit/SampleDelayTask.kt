@@ -15,7 +15,7 @@ class SampleDelayTask : AppCompatActivity(), View.OnClickListener {
     override fun onClick(v: View) {
         when (v.id) {
             R.id.btn_start -> {
-                _task.start(10_000)
+                _task.start(5_000)
             }
             R.id.btn_pause -> _task.pause()
             R.id.btn_resume -> _task.resume()
